@@ -79,6 +79,5 @@ test("parseCSV handles special characters", async () => {
   expect(results[2]).toEqual(["Bob", "30", "\".Hiking!?\"\""]);
 });
 
-// Could test for zod schemas, although parser just gives array of arrays right now
-// Once testing for zod schemas, tests for column headers can be added
+// Test for schema validation
 
