@@ -1,9 +1,9 @@
 import { parseCSV } from "../src/basic-parser";
 import * as path from "path";
+import {z} from "zod";
 
 const PEOPLE_CSV_PATH = path.join(__dirname, "../data/people.csv");
 
-//console.log(results);  // Testing line to see actual output
 
 test("parseCSV yields arrays", async () => {
   const results = await parseCSV(PEOPLE_CSV_PATH)
@@ -77,7 +77,62 @@ test("parseCSV handles special characters", async () => {
   expect(results[0]).toEqual(["name", "age", "note"]);
   expect(results[1]).toEqual(["Alice", "23", "\"Loves \\\"coding\\\"\""]);
   expect(results[2]).toEqual(["Bob", "30", "\".Hiking!?\"\""]);
+  // Want it to read as ["Alice", "23", "Loves \"coding\""]
+  // and ["Bob", "30", ".Hiking!?""] --> Should error since unmatched quotes
 });
 
 // Test for schema validation
 
+// Person schema (name and age)
+const PersonRowSchema = z.tuple([z.string(), z.coerce.number()])
+  .transform(tup => ({ name: tup[0], age: tup[1] }));
+
+// Product schema: (name, price, and inStock)
+const ProductRowSchema = z.tuple([z.string(), z.coerce.number(), z.coerce.string()])
+  .transform(tup => ({name: tup[0], price: tup[1], inStock: tup[2]}));
+// inStock was originally a boolean but changed it to a string since z.coerce.boolean()
+// was interpreting "false" as true
+
+test("parseCSV returns objects when schema is provided", async () => {
+  const results = await parseCSV(
+    path.join(__dirname, "../data/peopleValid.csv"), PersonRowSchema, true);
+  expect(results).toHaveLength(4);
+  expect(results[0]).toEqual({ name: "Alice", age: 23 });
+  expect(results[1]).toEqual({ name: "Bob", age: 30 });
+  expect(results[2]).toEqual({ name: "Charlie", age: 25 });
+  expect(results[3]).toEqual({ name: "Nim", age: 22 });
+});
+
+
+test("parseCSV throws error when schema is provided but data is invalid", async () => {
+  await expect(
+    parseCSV(PEOPLE_CSV_PATH, PersonRowSchema, true))
+    .rejects.toThrow("Validation Failed for row(s)");
+    // fails because of the "thirty" in the people.csv file
+});
+
+test("parseCSV handles objects with different schema", async () => {
+  const results = await parseCSV(
+    path.join(__dirname, "../data/products.csv"), ProductRowSchema, false
+  );
+  expect(results).toHaveLength(3);
+  expect(results[0]).toEqual({ name: "Computer", price: 1500, inStock: "yes" });
+  expect(results[1]).toEqual({ name: "PS5", price: 599.99, inStock: "no" });
+  expect(results[2]).toEqual({ name: "IPhone 15", price: 999.99, inStock: "yes" });
+});
+
+test("parseCSV returns array of arrays when no schema is provided", async () => {
+  const results = await parseCSV(path.join(__dirname, "../data/products.csv"));
+  expect(Array.isArray(results)).toBe(true);
+  expect(Array.isArray(results[0])).toBe(true);
+  expect(results[0]).toEqual(["Computer", "1500", "yes"]);
+});
+
+/** Test cases for quoted fields and commas within quotes
+test("parseCSV works with quotes in fields", async () => {
+  const results = await parseCSV(path.join(__dirname, "../data/quotes.csv"), undefined, true);
+  expect(results).toHaveLength(2);
+  expect(results[0]).toEqual(["Alice", "This is a quote from Alice."]);
+  expect(results[1]).toEqual(["Bob", "Bob's philosophical quote resides here."]);
+});
+*/

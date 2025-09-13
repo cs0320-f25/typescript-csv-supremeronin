@@ -16,7 +16,8 @@ import { ZodType } from "zod";
  * @param path The path to the file being loaded.
  * @returns a "promise" to produce a 2-d array of cell values
  */
-export async function parseCSV<T>(path: string, schema?: ZodType<T>): Promise<T[] | string[][]> {
+export async function parseCSV<T>(path: string, schema?: ZodType<T>, hasHeader: boolean = false): 
+  Promise<T[] | string[][]> {
   // This initial block of code reads from a file in Node.js. The "rl"
   // value can be iterated over in a "for" loop. 
   const fileStream = fs.createReadStream(path);
@@ -28,12 +29,19 @@ export async function parseCSV<T>(path: string, schema?: ZodType<T>): Promise<T[
   // Create an empty array to hold the results
   let arrayResult: string[][] = [];
   let objectResult: T[] = [];
-  
+
+  // Track if on the first row
+  let isFirstRow = true;
+
   // We add the "await" here because file I/O is asynchronous. 
   // We need to force TypeScript to _wait_ for a row before moving on. 
   // More on this in class soon!
   for await (const line of rl) {
     const values = line.split(",").map((v) => v.trim());
+    if (isFirstRow && hasHeader) {
+        isFirstRow = false;
+        continue; // skipping header row if it's there
+      }
     if (schema) {
       const parsed  = schema.safeParse(values);
       if (parsed.success) {
@@ -44,7 +52,9 @@ export async function parseCSV<T>(path: string, schema?: ZodType<T>): Promise<T[
     } else {
       arrayResult.push(values);
     }
+    isFirstRow = false;
   }
 
   return schema ? objectResult : arrayResult;
+
 }

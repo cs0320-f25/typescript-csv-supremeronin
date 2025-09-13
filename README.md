@@ -71,16 +71,25 @@
 ### 1340 Supplement
 
 - #### 1. Correctness
-
+ - The parser should extract all data from the CSV file accurately, and preserve the content of each cell/array slot so the caller and work with it how they need to.
+ - Errors that arise due to csv file issues or things like that should be raised for the caller to see so they can adjust/correct what needs to be corrected.
+ - If schema is provided, the parser should be able to validate and transform each row to fit with that schema.
+ - Each row/initial array slot should have the expected number of columns, matching either the schema provided by the caller or header (if there is one).
 - #### 2. Random, On-Demand Generation
-
+ - By running the randomly generating CSVs on the parser, I could find bugs that occur in scenarios I wouldn't think to test or write myself.
+ - Very large CSV files would test if the parser performs well and doesn't bog down under a heavy load of data.
+ - Ultimately the more unpredictable and different the test data is, the more confident it would make me that the parser works well under all sorts of scenarios
 - #### 3. Overall experience, Bugs encountered and resolved
+ - What set this sprint apart/surprised me the most compared to other CS homeworks in the past was mostly the few parts where you get the LLM to expand your perspective on things rather than thinking only about what you know in the moment. Also this sprint felt more vague in terms of direction compared to other homeworks in the past, it seemed to simulate more real-world application a bit more though. 
+ - One small issue I encountered in this sprint was when testing my parser on a product schema I created where I was going to use z.coerce.boolean() but I figured out zod wouldn't automatically detect the string "false" as false so no matter what was in the CSV it would always be true. From there I just changed that parameter to be a string instead.
 #### Errors/Bugs:
 #### Tests:
 #### How To…
 
 #### Team members and contributions (include cs logins):
 
-#### Collaborators (cslogins of anyone you worked with on this project and/or generative AI):
+#### Collaborators (cslogins of anyone you worked with on this project and/or generative AI): 
+    mciovacc
+    Used Copilot as LLM
 #### Total estimated time it took to complete project:
 #### Link to GitHub Repo:  
