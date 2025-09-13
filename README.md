@@ -38,18 +38,18 @@
         User Story:
         “As a developer, I want the parser to optionally output data as an array of objects validated by a Zod schema, so that I can ensure my data matches expected types and structure.”
         Acceptance Criteria:
-         - User can set the delimiter when calling the parser.
-         - All fields are split according to the chosen delimiter.
-         - Quoted fields are still handled correctly regardless of delimiter.
+         - User can optionally add a zod schema to use.
+         - From there the output of the function will be an array of zod objects.
+         - If given zod schema has issues or the csv has issues, an error will be raised to notify the caller that something has gone wrong.
 
     3. Functionality: Distinguish and Use Header Row
         Source: Me
         User Story:
-        “As a developer, I want the parser to recognize and use the header row for labeling columns, so that I can easily reference data by column name and avoid confusion between headers and data rows.”
+        “As a developer, I want the parser to handle headers the right way especially when a zod schema is in place.”
         Acceptance Criteria:
-         - The first row, once checked, is treated as the header and not as data.
-         - All subsequent rows use header keys for mapping.
-         - Option to skip or include header row in output.     
+         - A user can select (as a parameter) whether the first row of the csv includes headers or not.
+         - From there the header can be skipped over if need be so that the zod schema doesn't error on headers/labels.
+         - Or the header can be kept as the first row/array item.  
 
     4. Functionality: Handle Empty Cells and Inconsistent Rows
         Source: Me
@@ -58,7 +58,7 @@
         Acceptance Criteria:
          - Empty cells are parsed as empty strings or null.
          - Rows with missing columns fill missing values with null or empty string.
-         - Extra columns are either ignored or included with a generic key.
+         - Extra columns are either ignored or included with some sort of generic key.
 
 
 
