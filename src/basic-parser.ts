@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import * as readline from "readline";
-import * as z from "zod";
 import { ZodType } from "zod";
 
 /**
